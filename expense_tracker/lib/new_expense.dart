@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/models/expesne.dart';
+import 'package:flutter/rendering.dart';
 
 class NewExpense extends StatefulWidget {
   const NewExpense({super.key,required this.onAddExpense});
@@ -77,80 +78,95 @@ class _NewExpensesState extends State<NewExpense> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 60, 16, 16),
-      child: Column(
-        children: [
-          TextField(
-            controller: _titleController,
-            maxLength: 50,
-            decoration: const InputDecoration(
-              label: Text('Title'),
-            ),
-          ),
-          Row(
+    final keyBoradSpace = MediaQuery.of(context).viewInsets.bottom;
+
+    return LayoutBuilder(builder: (ctx, constraints){
+
+      print(constraints.minHeight);
+      print(constraints.maxHeight);
+      print(constraints.minWidth);
+      print(constraints.maxWidth);
+      return SizedBox(
+      height: double.infinity,
+      child: SingleChildScrollView(
+        child: Padding(
+          padding:  EdgeInsets.fromLTRB(16,50, 16, 16+ keyBoradSpace),
+          child: Column(
             children: [
-              Expanded(
-                child: TextField(
-                  controller: _amountController,
-                  keyboardType: TextInputType.number,
-                  maxLength: 10,
-                  decoration: const InputDecoration(
-                    prefixText: 'Rs ',
-                    label: Text('Amount'),
+              TextField(
+                controller: _titleController,
+                maxLength: 50,
+                decoration: const InputDecoration(
+                  label: Text('Title'),
+                ),
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _amountController,
+                      keyboardType: TextInputType.number,
+                      maxLength: 10,
+                      decoration: const InputDecoration(
+                        prefixText: 'Rs ',
+                        label: Text('Amount'),
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(
+                    width: 16,
+                  ),
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      //crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(_selectedDate == null
+                            ? 'Select Date'
+                            : formatter.format(_selectedDate!)),
+                        IconButton(
+                            onPressed: _presentDatePicker,
+                            icon: const Icon(Icons.calendar_month)),
+                      ],
+                    ),
+                  )
+                ],
               ),
-              const SizedBox(
-                width: 16,
+              const SizedBox(height: 16,),
+              Row(
+                children: [
+                  DropdownButton(
+                      value:  _selectedCatagory,
+                      items: Category.values
+                          .map((category) => DropdownMenuItem(
+                              value: category,
+                              child: Text(category.name.toUpperCase())))
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          if(value== null) {return;}
+                          _selectedCatagory = value;
+                        });
+                      }),
+                      const Spacer(),
+                  TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Cancel')),
+                  ElevatedButton(
+                      onPressed: () {
+                        _submitExpenseData();
+                      },
+                      child: const Text('Save Expense')),
+                ],
               ),
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  //crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(_selectedDate == null
-                        ? 'Select Date'
-                        : formatter.format(_selectedDate!)),
-                    IconButton(
-                        onPressed: _presentDatePicker,
-                        icon: const Icon(Icons.calendar_month)),
-                  ],
-                ),
-              )
             ],
           ),
-          const SizedBox(height: 16,),
-          Row(
-            children: [
-              DropdownButton(
-                  value:  _selectedCatagory,
-                  items: Category.values
-                      .map((category) => DropdownMenuItem(
-                          value: category,
-                          child: Text(category.name.toUpperCase())))
-                      .toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      if(value== null) {return;}
-                      _selectedCatagory = value;
-                    });
-                  }),
-                  const Spacer(),
-              TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text('Cancel')),
-              ElevatedButton(
-                  onPressed: () {
-                    _submitExpenseData();
-                  },
-                  child: const Text('Save Expense')),
-            ],
-          ),
-        ],
+        ),
       ),
     );
+    });
+
   }
 }
